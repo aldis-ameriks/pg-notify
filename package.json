@@ -1,0 +1,22 @@
+{
+  "name": "pg-pubsub",
+  "version": "0.0.1",
+  "main": "lib/pg-pubsub.js",
+  "scripts": {
+    "test": "ava --serial",
+    "coverage": "nyc ava --serial"
+  },
+  "author": "Aldis Ameriks <aldis.ameriks@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.2.0",
+    "pg": "^8.4.1",
+    "pg-format": "^1.0.4",
+    "secure-json-parse": "^2.1.0"
+  },
+  "devDependencies": {
+    "ava": "^3.13.0",
+    "nyc": "^15.1.0",
+    "standard": "^15.0.0"
+  }
+}
