@@ -34,6 +34,7 @@
     "secure-json-parse": "^2.1.0"
   },
   "devDependencies": {
+    "@types/pg": "^7.14.5",
     "ava": "^3.13.0",
     "dotenv": "^8.2.0",
     "nyc": "^15.1.0",
