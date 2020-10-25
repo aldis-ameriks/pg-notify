@@ -115,6 +115,38 @@ test('works with callbacks', async (t) => {
   t.deepEqual(pubsub.channels, {})
 })
 
+test('works when topic is in uppercase', async (t) => {
+  t.timeout(1000)
+
+  const pubsub = new PGPubSub({ db: dbConfig })
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  t.deepEqual(pubsub.channels, {})
+  const state = { expected: 2, actual: 0 }
+
+  const listener = (payload) => {
+    t.deepEqual(payload, { payload: 'this-is-the-payload' })
+    state.actual++
+  }
+
+  await pubsub.on('CHANNEL', listener)
+  await pubsub.on('CHANNEL', listener)
+  t.deepEqual(pubsub.channels, { CHANNEL: { listeners: 2 } })
+
+  await pubsub.emit({ topic: 'CHANNEL', payload: 'this-is-the-payload' })
+  await waitUntilStateIsSatisfied(state)
+
+  await pubsub.removeListener('CHANNEL', listener)
+  t.deepEqual(pubsub.channels, { CHANNEL: { listeners: 1 } })
+
+  await pubsub.removeListener('CHANNEL', listener)
+  t.deepEqual(pubsub.channels, {})
+})
+
 test('retries and throws when initial connection fails', async (t) => {
   t.timeout(3000)
 
