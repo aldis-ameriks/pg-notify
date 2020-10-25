@@ -388,7 +388,12 @@ test('continuously failing messages are dropped from queue', async (t) => {
   t.timeout(1000)
 
   // intentionally increase max payload size above standard 8000 bytes
-  const pubsub = new PGPubSub({ db: dbConfig, maxPayloadSize: 20000 })
+  const pubsub = new PGPubSub({
+    db: dbConfig,
+    maxPayloadSize: 20000,
+    continuousEmitFailureThreshold: 3,
+    emitThrottleDelay: 10
+  })
 
   t.teardown(() => {
     pubsub.close()
@@ -409,6 +414,43 @@ test('continuously failing messages are dropped from queue', async (t) => {
 
   const state = { expected: 0, actual: () => pubsub.queue.length }
   await waitUntilStateIsSatisfied(state)
+  await sleep(100) // to ensure message is never received in subscribe
+})
+
+test('aborts flushing queue when connection is lost', async (t) => {
+  t.timeout(1000)
+
+  // intentionally increase max payload size above standard 8000 bytes
+  const pubsub = new PGPubSub({
+    db: dbConfig,
+    maxPayloadSize: 20000
+  })
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  t.deepEqual(pubsub.queue, [])
+  // emit payload that's too large for a standard configuration of postgres
+  // since we're not connected yet, it will just be added in message queue
+  await pubsub.emit({ topic: 'channel', payload: 'a'.repeat(10000) })
+  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'a'.repeat(10000), _retries: 0 }])
+
+  await pubsub.on('channel', (_payload) => {
+    t.fail()
+  })
+
+  // after we connect, the queue should get flushed with pg throwing error due to payload size
+  pubsub.connect()
+  let state = { expected: true, actual: () => pubsub.flushingQueue }
+  await waitUntilStateIsSatisfied(state)
+
+  pubsub.close()
+  state = { expected: false, actual: () => pubsub.flushingQueue }
+  await waitUntilStateIsSatisfied(state)
+
+  // the message is still in the queue
+  t.is(pubsub.queue.length, 1)
   await sleep(100) // to ensure message is never received in subscribe
 })
 
@@ -631,4 +673,11 @@ test('reconnects automatically', async (t) => {
     pubsub.close()
     client.end()
   })
+})
+
+test('calling close before connected', async (t) => {
+  t.timeout(1000)
+  const pubsub = new PGPubSub({ db: dbConfig })
+  await pubsub.close()
+  t.pass()
 })
