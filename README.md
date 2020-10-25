@@ -28,6 +28,25 @@ npm install pg-notify
 yarn add pg-notify
 ```
 
+## Usage
+
+```js
+const PGPubSub = require('pg-notify')
+// import PGPubSub from 'pg-notify
+
+;(async () => {
+  const pubsub = new PGPubSub({
+    db: { connectionString: 'postgres://postgres:postgres@localhost:5432/db' }
+  })
+  await pubsub.connect()
+
+  await pubsub.on('test', (payload) => {
+    console.log('payload: ', payload)
+  })
+  await pubsub.emit({ topic: 'test', payload: 'this is the payload' })
+})()
+```
+
 ## Contributing
 
 Contributions, issues and feature requests are welcome!
