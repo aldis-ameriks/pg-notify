@@ -1,13 +1,32 @@
 {
   "name": "pg-pubsub",
   "version": "0.0.1",
-  "main": "lib/pg-pubsub.js",
+  "description": "Postgres pubsub client",
+  "main": "index.js",
   "scripts": {
     "test": "ava --serial",
+    "test:types": "tsd",
+    "lint": "standard",
     "coverage": "nyc ava --serial"
   },
   "author": "Aldis Ameriks <aldis.ameriks@gmail.com>",
+  "keywords": [
+    "postgres",
+    "pubsub",
+    "pg",
+    "notify",
+    "listen",
+    "subscribe"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldis-ameriks/pg-pubsub.git"
+  },
+  "homepage": "https://github.com/aldis-ameriks/pg-pubsub#readme",
+  "bugs": {
+    "url": "https://github.com/aldis-ameriks/pg-pubsub/issues"
+  },
   "dependencies": {
     "debug": "^4.2.0",
     "pg": "^8.4.1",
@@ -16,7 +35,12 @@
   },
   "devDependencies": {
     "ava": "^3.13.0",
+    "dotenv": "^8.2.0",
     "nyc": "^15.1.0",
-    "standard": "^15.0.0"
+    "standard": "^15.0.0",
+    "tsd": "^0.13.1"
+  },
+  "tsd": {
+    "directory": "test/types"
   }
 }
