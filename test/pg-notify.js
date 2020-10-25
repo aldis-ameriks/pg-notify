@@ -454,7 +454,7 @@ test('aborts flushing queue when connection is lost', async (t) => {
 
   // intentionally increase max payload size above standard 8000 bytes
   const pubsub = new PGPubSub({
-    db: dbConfig,
+    db: { ...dbConfig },
     maxPayloadSize: 20000
   })
 
@@ -477,7 +477,8 @@ test('aborts flushing queue when connection is lost', async (t) => {
   let state = { expected: true, actual: () => pubsub.flushingQueue }
   await waitUntilStateIsSatisfied(state)
 
-  pubsub.close()
+  pubsub.opts.db.host = 'xxxx'
+  pubsub.connect()
   state = { expected: false, actual: () => pubsub.flushingQueue }
   await waitUntilStateIsSatisfied(state)
 
