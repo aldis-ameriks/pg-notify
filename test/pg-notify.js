@@ -5,7 +5,7 @@ require('dotenv').config()
 const test = require('ava')
 const pg = require('pg')
 const util = require('util')
-const PGPubSub = require('../lib/pg-pubsub')
+const PGPubSub = require('../lib/pg-notify')
 
 const sleep = util.promisify(setTimeout)
 

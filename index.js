@@ -1,3 +1,3 @@
-const PGPubSub = require('./lib/pg-pubsub')
+const PGPubSub = require('./lib/pg-notify')
 
 module.exports = PGPubSub

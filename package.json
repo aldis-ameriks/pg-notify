@@ -1,6 +1,6 @@
 {
-  "name": "pg-pubsub",
-  "version": "0.0.1",
+  "name": "pg-notify",
+  "version": "0.0.2",
   "description": "Postgres pubsub client",
   "main": "index.js",
   "scripts": {
@@ -21,11 +21,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aldis-ameriks/pg-pubsub.git"
+    "url": "git+https://github.com/aldis-ameriks/pg-notify.git"
   },
-  "homepage": "https://github.com/aldis-ameriks/pg-pubsub#readme",
+  "homepage": "https://github.com/aldis-ameriks/pg-notify#readme",
   "bugs": {
-    "url": "https://github.com/aldis-ameriks/pg-pubsub/issues"
+    "url": "https://github.com/aldis-ameriks/pg-notify/issues"
   },
   "dependencies": {
     "debug": "^4.2.0",

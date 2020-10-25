@@ -1,13 +1,13 @@
 'use strict'
 
 require('dotenv').config()
-const PubSubPostgres = require('./lib/pg-pubsub')
+const PGPubSub = require('./lib/pg-notify')
 const util = require('util')
 
 const sleep = util.promisify(setTimeout)
 
 ;(async () => {
-  const pubsub = new PubSubPostgres({
+  const pubsub = new PGPubSub({
     reconnectMaxRetries: 100000,
     db: {
       host: process.env.DB_HOST,
