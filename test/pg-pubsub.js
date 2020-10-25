@@ -363,6 +363,24 @@ test('emit with payload exceeding max size', async (t) => {
   }
 })
 
+test.only('emit with payload exceeding max size after escaping', async (t) => {
+  t.timeout(1000)
+
+  const pubsub = new PGPubSub({ db: dbConfig })
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  try {
+    // payload will grow twice as large due to escaping
+    pubsub.emit({ topic: 'channel', payload: '\''.repeat(5000) })
+  } catch (err) {
+    t.is(err.message, 'Payload exceeds maximum size: 7999')
+  }
+})
+
 test('subscribing multiple times for same topic', async (t) => {
   t.timeout(1000)
 
