@@ -37,6 +37,9 @@ async function waitUntilStateIsSatisfied (state) {
   }
 }
 
+// suppress log errors during test runs
+console.error = function () {}
+
 test('works with await', async (t) => {
   t.timeout(1000)
 
@@ -281,8 +284,8 @@ test('emit when not connected', async (t) => {
   await pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' })
 
   t.deepEqual(pubsub.queue, [
-    { topic: 'channel', payload: 'this-is-the-payload' },
-    { topic: 'channel', payload: 'this-is-the-payload' }
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
   ])
 
   const state = { expected: 2, actual: 0 }
@@ -311,7 +314,7 @@ test.skip('subscribing and unsubscribing while not connected', async (t) => {
   await new Promise(resolve => {
     pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' }, resolve)
   })
-  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'this-is-the-payload' }])
+  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }])
 
   const state = { expected: 2, actual: 0 }
 
@@ -363,7 +366,7 @@ test('emit with payload exceeding max size', async (t) => {
   }
 })
 
-test.only('emit with payload exceeding max size after escaping', async (t) => {
+test('emit with payload exceeding max size after escaping', async (t) => {
   t.timeout(1000)
 
   const pubsub = new PGPubSub({ db: dbConfig })
@@ -379,6 +382,34 @@ test.only('emit with payload exceeding max size after escaping', async (t) => {
   } catch (err) {
     t.is(err.message, 'Payload exceeds maximum size: 7999')
   }
+})
+
+test('continuously failing messages are dropped from queue', async (t) => {
+  t.timeout(1000)
+
+  // intentionally increase max payload size above standard 8000 bytes
+  const pubsub = new PGPubSub({ db: dbConfig, maxPayloadSize: 20000 })
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  t.deepEqual(pubsub.queue, [])
+  // emit payload that's too large for a standard configuration of postgres
+  // since we're not connected yet, it will just be added in message queue
+  await pubsub.emit({ topic: 'channel', payload: 'a'.repeat(10000) })
+  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'a'.repeat(10000), _retries: 0 }])
+
+  await pubsub.on('channel', (_payload) => {
+    t.fail()
+  })
+
+  // after we connect, the queue should get flushed with pg throwing error due to payload size
+  await pubsub.connect()
+
+  const state = { expected: 0, actual: () => pubsub.queue.length }
+  await waitUntilStateIsSatisfied(state)
+  await sleep(100) // to ensure message is never received in subscribe
 })
 
 test('subscribing multiple times for same topic', async (t) => {
