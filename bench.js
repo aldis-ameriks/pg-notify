@@ -23,7 +23,7 @@ const PubSubPostgres = require('./lib/pg-pubsub')
   console.time('start')
   const count = 10000
   for (let i = 0; i < count; i++) {
-    await pubsub.emitAsync({ topic: 'test', payload: 'payload' })
+    await pubsub.emit({ topic: 'test', payload: 'payload' })
   }
   console.timeEnd('start')
   assert.equal(messages, count)
