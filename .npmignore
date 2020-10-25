@@ -1,10 +1,7 @@
-.idea
-.nyc_output
-node_modules
-package-lock.json
-yarn.lock
-
-.github
-.dependabot
-test
-docker-compose.yml
+*
+!lib/*
+!index.js
+!index.d.ts
+!package.json
+!README.md
+!LICENSE
