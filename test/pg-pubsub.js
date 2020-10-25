@@ -332,7 +332,10 @@ test.skip('subscribing and unsubscribing while not connected', async (t) => {
 
   await pubsub.removeListener('channel', listener)
   t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
-  await pubsub.removeListener('channel', listener)
+
+  await new Promise(resolve => {
+    pubsub.removeListener('channel', listener, resolve)
+  })
   t.deepEqual(pubsub.channels, {})
 
   pubsub.on('channel', listener)
