@@ -549,8 +549,11 @@ test('attempting to subscribe when closing', async (t) => {
   t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
   pubsub.close()
   t.deepEqual(pubsub.channels, {})
-  pubsub.on('channel', (_payload) => {})
+  pubsub.on('channel', (_payload) => {
+    t.fail()
+  })
   t.deepEqual(pubsub.channels, {})
+  pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' })
 })
 
 test('removing the only listener unlistens topic', async (t) => {
@@ -713,4 +716,13 @@ test('calling close before connected', async (t) => {
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.close()
   t.pass()
+})
+
+test('calling close removes listeners', async (t) => {
+  t.timeout(1000)
+  const pubsub = new PGPubSub({ db: dbConfig })
+  pubsub.on('topic', () => {})
+  t.is(pubsub.ee.listenerCount('topic'), 1)
+  await pubsub.close()
+  t.is(pubsub.ee.listenerCount('topic'), 0)
 })
