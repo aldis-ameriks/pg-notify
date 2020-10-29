@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to pg-notify 👋</h1>
+<h1 align="center">pg-notify</h1>
 <p>
     <a href="https://www.npmjs.com/package/pg-notify" target="_blank">
         <img alt="Version" src="https://img.shields.io/npm/v/pg-notify.svg">
@@ -38,11 +38,13 @@ const PGPubSub = require('pg-notify')
   const pubsub = new PGPubSub({
     db: { connectionString: 'postgres://postgres:postgres@localhost:5432/db' }
   })
+
   await pubsub.connect()
 
   await pubsub.on('test', (payload) => {
     console.log('payload: ', payload)
   })
+
   await pubsub.emit({ topic: 'test', payload: 'this is the payload' })
 })()
 ```
