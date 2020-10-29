@@ -1,0 +1,38 @@
+name: Create release notes
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Fetch all tags
+        run: git fetch --depth=100 origin +refs/tags/*:refs/tags/*
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          prev_tag=$(git describe --abbrev=0 --tags ${{ github.ref }}^)
+          log=$(git log --pretty="format:%s %H" $prev_tag..${{ github.ref }} | grep -E "^(docs|fix|feat|test|refactor|build|ci|perf|style|chore):" | sort -g | awk '{print $(NF)}' | xargs git show --no-patch --decorate=no --oneline)
+          log="${log//'%'/'%25'}"
+          log="${log//$'\n'/'%0A'}"
+          log="${log//$'\r'/'%0D'}"
+          echo "::set-output name=value::$log"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.value }}
+          draft: false
+          prerelease: false
