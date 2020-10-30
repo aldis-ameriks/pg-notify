@@ -25,11 +25,11 @@ jobs:
       - run: npm run test:types
       - run: npm test
       - run: docker-compose down
-        env:
-          CI: true
-          DB_HOST: localhost
-          DB_PORT: 5433
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_SSL: false
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    env:
+      CI: true
+      DB_HOST: localhost
+      DB_PORT: 5433
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SSL: false
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
