@@ -3,6 +3,7 @@
 require('dotenv').config()
 const PGPubSub = require('./lib/pg-notify')
 const util = require('util')
+const assert = require('assert').strict
 
 const sleep = util.promisify(setTimeout)
 
@@ -22,13 +23,14 @@ const sleep = util.promisify(setTimeout)
 
   const state = { expected: 50000, actual: 0 }
 
-  pubsub.on('test', (_payload) => {
+  pubsub.on('test', (payload) => {
     state.actual++
+    assert.equal(payload, 'payload')
   })
 
   console.time('bench')
   for (let i = 0; i < state.expected; i++) {
-    await pubsub.emit({ topic: 'test', payload: 'payload' })
+    await pubsub.emit('test', 'payload')
     if (i % 1000 === 0) {
       console.log('emit counter: ', i)
     }
