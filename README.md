@@ -49,7 +49,8 @@ const PGPubSub = require('pg-notify')
     console.log('payload: ', payload)
   })
 
-  await pubsub.emit({ topic: 'test', payload: 'this is the payload' })
+  await pubsub.emit('test', 'this is the payload')
+  await pubsub.emit('test', { foo: 'bar' })
 })()
 ```
 

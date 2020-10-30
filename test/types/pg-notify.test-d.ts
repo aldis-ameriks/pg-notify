@@ -9,6 +9,7 @@ new PGPubSub({
   maxPayloadSize: 1,
   reconnectDelay: 1,
   reconnectMaxRetries: 1,
+  emulateMqEmitterApi: true,
   db: {
     connectionString: 'connection string'
   }
