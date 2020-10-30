@@ -425,8 +425,7 @@ test('emit when not connected and queue overflows', async (t) => {
   await waitUntilStateIsSatisfied(state)
 })
 
-// TODO: Removing listeners is not working as expected, because new handler is created on subscribe
-test.skip('subscribing and unsubscribing while not connected', async (t) => {
+test('subscribing and unsubscribing while not connected', async (t) => {
   t.timeout(1000)
 
   const pubsub = new PGPubSub({ db: dbConfig })
