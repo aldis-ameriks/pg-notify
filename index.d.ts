@@ -7,6 +7,7 @@ export interface Options {
   maxEmitRetries?: number;
   emitThrottleDelay?: number;
   continuousEmitFailureThreshold?: number;
+  queueSize?: number;
   emulateMqEmitterApi?: boolean
   db: ClientConfig;
 }
