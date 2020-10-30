@@ -19,6 +19,10 @@
 
 > Postgres PubSub client using NOTIFY/LISTEN
 
+This is a pre-release version, which does not follow semver. There can be breaking changes in patch/minor versions.
+The first stable release will be released with v1.0.0.
+Use this at your own risk.
+
 ## Install
 
 ```sh
