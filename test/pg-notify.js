@@ -388,6 +388,43 @@ test('emit when not connected', async (t) => {
   await waitUntilStateIsSatisfied(state)
 })
 
+test('emit when not connected and queue overflows', async (t) => {
+  t.timeout(1000)
+
+  const pubsub = new PGPubSub({ db: dbConfig, queueSize: 2 })
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  t.deepEqual(pubsub.queue, [])
+
+  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit('channel', 'this-is-the-payload')
+
+  t.deepEqual(pubsub.queue, [
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
+  ])
+
+  await pubsub.emit('channel', 'this-is-the-payload')
+  t.deepEqual(pubsub.queue, [
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
+    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
+  ])
+
+  const state = { expected: 2, actual: 0 }
+  pubsub.on('channel', (payload) => {
+    t.deepEqual(payload, 'this-is-the-payload')
+    state.actual++
+  })
+
+  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+
+  await pubsub.connect()
+  await waitUntilStateIsSatisfied(state)
+})
+
 // TODO: Removing listeners is not working as expected, because new handler is created on subscribe
 test.skip('subscribing and unsubscribing while not connected', async (t) => {
   t.timeout(1000)
