@@ -1,6 +1,6 @@
 {
   "name": "pg-notify",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Postgres pubsub client",
   "main": "index.js",
   "scripts": {
