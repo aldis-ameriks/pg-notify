@@ -8,7 +8,7 @@
     "test:types": "tsd",
     "test:all": "npm run lint && npm run test && npm run test:types",
     "lint": "standard",
-    "coverage": "nyc ava --serial"
+    "coverage": "nyc --reporter=lcov --reporter=text ava --serial"
   },
   "author": "Aldis Ameriks <aldis.ameriks@gmail.com>",
   "keywords": [
@@ -37,6 +37,7 @@
   "devDependencies": {
     "@types/pg": "^7.14.5",
     "ava": "^3.13.0",
+    "coveralls": "^3.1.0",
     "dotenv": "^8.2.0",
     "nyc": "^15.1.0",
     "standard": "^16.0.0",

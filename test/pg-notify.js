@@ -1,8 +1,7 @@
 'use strict'
 
-console.log('process.env.DB_HOST 1: ', process.env.DB_HOST)
 require('dotenv').config()
-console.log('process.env.DB_HOST 2: ', process.env.DB_HOST)
+
 const test = require('ava')
 const pg = require('pg')
 const util = require('util')

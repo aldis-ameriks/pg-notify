@@ -23,7 +23,8 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm run test:types
-      - run: npm test
+      - run: npm run coverage
+      - run: cat coverage/lcov.info | ./node_modules/.bin/coveralls
       - run: docker-compose down
     env:
       CI: true
