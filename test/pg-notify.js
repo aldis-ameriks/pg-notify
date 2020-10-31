@@ -149,6 +149,33 @@ test('works when topic is in uppercase', async (t) => {
   t.deepEqual(pubsub.channels, {})
 })
 
+test('works with concurrent emits', async (t) => {
+  t.timeout(2000)
+
+  const pubsub = new PGPubSub({ db: dbConfig })
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  t.deepEqual(pubsub.channels, {})
+  const state = { expected: 1000, actual: 0 }
+
+  const listener = (payload) => {
+    t.deepEqual(payload, 'this-is-the-payload')
+    state.actual++
+  }
+
+  await pubsub.on('channel', listener)
+  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+
+  for (let i = 0; i < state.expected; i++) {
+    pubsub.emit('channel', 'this-is-the-payload')
+  }
+  await waitUntilStateIsSatisfied(state)
+})
+
 test('can emulate mqemitter api', async (t) => {
   t.timeout(1000)
 
