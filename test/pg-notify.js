@@ -39,12 +39,17 @@ async function waitUntilStateIsSatisfied (state) {
   }
 }
 
+function getChannel () {
+  return `channel_${Date.now()}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+}
+
 // suppress log errors during test runs
 console.error = function () {}
 
 test('works with await', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -60,23 +65,24 @@ test('works with await', async (t) => {
     state.actual++
   }
 
-  await pubsub.on('channel', listener)
-  await pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  await pubsub.on(channel, listener)
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
-  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
   await waitUntilStateIsSatisfied(state)
 
-  await pubsub.removeListener('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
-  await pubsub.removeListener('channel', listener)
+  await pubsub.removeListener(channel, listener)
   t.deepEqual(pubsub.channels, {})
 })
 
 test('works with callbacks', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -93,26 +99,26 @@ test('works with callbacks', async (t) => {
   }
 
   await new Promise(resolve => {
-    pubsub.on('channel', listener, resolve)
+    pubsub.on(channel, listener, resolve)
   })
   await new Promise(resolve => {
-    pubsub.on('channel', listener, resolve)
+    pubsub.on(channel, listener, resolve)
   })
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
   await new Promise(resolve => {
-    pubsub.emit('channel', 'this-is-the-payload', resolve)
+    pubsub.emit(channel, 'this-is-the-payload', resolve)
   })
 
   await waitUntilStateIsSatisfied(state)
 
   await new Promise(resolve => {
-    pubsub.removeListener('channel', listener, resolve)
+    pubsub.removeListener(channel, listener, resolve)
   })
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   await new Promise(resolve => {
-    pubsub.removeListener('channel', listener, resolve)
+    pubsub.removeListener(channel, listener, resolve)
   })
   t.deepEqual(pubsub.channels, {})
 })
@@ -120,6 +126,7 @@ test('works with callbacks', async (t) => {
 test('works when topic is in uppercase', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -135,23 +142,24 @@ test('works when topic is in uppercase', async (t) => {
     state.actual++
   }
 
-  await pubsub.on('CHANNEL', listener)
-  await pubsub.on('CHANNEL', listener)
-  t.deepEqual(pubsub.channels, { CHANNEL: { listeners: 2 } })
+  await pubsub.on(channel, listener)
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
-  await pubsub.emit('CHANNEL', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
   await waitUntilStateIsSatisfied(state)
 
-  await pubsub.removeListener('CHANNEL', listener)
-  t.deepEqual(pubsub.channels, { CHANNEL: { listeners: 1 } })
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
-  await pubsub.removeListener('CHANNEL', listener)
+  await pubsub.removeListener(channel, listener)
   t.deepEqual(pubsub.channels, {})
 })
 
 test('works with concurrent emits', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -167,11 +175,11 @@ test('works with concurrent emits', async (t) => {
     state.actual++
   }
 
-  await pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   for (let i = 0; i < state.expected; i++) {
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   }
   await waitUntilStateIsSatisfied(state)
 })
@@ -179,6 +187,7 @@ test('works with concurrent emits', async (t) => {
 test('can emulate mqemitter api', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig, emulateMqEmitterApi: true })
   await pubsub.connect()
 
@@ -194,17 +203,17 @@ test('can emulate mqemitter api', async (t) => {
     state.actual++
   }
 
-  await pubsub.on('channel', listener)
-  await pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  await pubsub.on(channel, listener)
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
-  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
   await waitUntilStateIsSatisfied(state)
 
-  await pubsub.removeListener('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
-  await pubsub.removeListener('channel', listener)
+  await pubsub.removeListener(channel, listener)
   t.deepEqual(pubsub.channels, {})
 })
 
@@ -233,6 +242,7 @@ test('retries and throws when initial connection fails', async (t) => {
 test('connection can be re-established', async (t) => {
   t.timeout(5000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({
     reconnectMaxRetries: 50,
     reconnectDelay: 100,
@@ -244,12 +254,12 @@ test('connection can be re-established', async (t) => {
   t.is(pubsub.state, 'connected')
 
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
       resolve()
     })
 
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
   const client = new pg.Client({ ...dbConfig })
@@ -271,18 +281,18 @@ test('connection can be re-established', async (t) => {
   let state = { expected: 'connected', actual: () => pubsub.state }
   await waitUntilStateIsSatisfied(state)
 
-  pubsub.emit('channel', 'this-is-the-payload')
+  pubsub.emit(channel, 'this-is-the-payload')
 
   state = { expected: 1, actual: 0 }
 
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
       state.actual++
       resolve()
     })
 
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   })
   await waitUntilStateIsSatisfied(state)
 
@@ -323,6 +333,7 @@ test('closing while reconnecting interrupts', async (t) => {
 test('emit with callback', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -331,7 +342,7 @@ test('emit with callback', async (t) => {
   })
 
   return new Promise(resolve => {
-    pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' }, () => {
+    pubsub.emit({ topic: channel, payload: 'this-is-the-payload' }, () => {
       t.pass()
       resolve()
     })
@@ -341,6 +352,7 @@ test('emit with callback', async (t) => {
 test('emit with object payload', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -350,19 +362,20 @@ test('emit with object payload', async (t) => {
 
   t.deepEqual(pubsub.channels, {})
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, { foo: 'bar' })
       resolve()
     })
 
-    pubsub.emit({ topic: 'channel', payload: { foo: 'bar' } })
+    pubsub.emit({ topic: channel, payload: { foo: 'bar' } })
   })
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 })
 
 test('emit with object payload and simple api', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -372,19 +385,20 @@ test('emit with object payload and simple api', async (t) => {
 
   t.deepEqual(pubsub.channels, {})
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, { foo: 'bar' })
       resolve()
     })
 
-    pubsub.emit('channel', { foo: 'bar' })
+    pubsub.emit(channel, { foo: 'bar' })
   })
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 })
 
 test('emit when not connected', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
 
   t.teardown(() => {
@@ -393,23 +407,23 @@ test('emit when not connected', async (t) => {
 
   t.deepEqual(pubsub.queue, [])
   await new Promise(resolve => {
-    pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' }, resolve)
+    pubsub.emit({ topic: channel, payload: 'this-is-the-payload' }, resolve)
   })
 
-  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
 
   t.deepEqual(pubsub.queue, [
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 },
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 }
   ])
 
   const state = { expected: 2, actual: 0 }
-  pubsub.on('channel', (payload) => {
+  pubsub.on(channel, (payload) => {
     t.deepEqual(payload, 'this-is-the-payload')
     state.actual++
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   await pubsub.connect()
   await waitUntilStateIsSatisfied(state)
@@ -418,6 +432,7 @@ test('emit when not connected', async (t) => {
 test('emit when not connected and queue overflows', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig, queueSize: 2 })
 
   t.teardown(() => {
@@ -426,27 +441,27 @@ test('emit when not connected and queue overflows', async (t) => {
 
   t.deepEqual(pubsub.queue, [])
 
-  await pubsub.emit('channel', 'this-is-the-payload')
-  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
 
   t.deepEqual(pubsub.queue, [
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 },
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 }
   ])
 
-  await pubsub.emit('channel', 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
   t.deepEqual(pubsub.queue, [
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 },
-    { topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 },
+    { topic: channel, payload: 'this-is-the-payload', _retries: 0 }
   ])
 
   const state = { expected: 2, actual: 0 }
-  pubsub.on('channel', (payload) => {
+  pubsub.on(channel, (payload) => {
     t.deepEqual(payload, 'this-is-the-payload')
     state.actual++
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   await pubsub.connect()
   await waitUntilStateIsSatisfied(state)
@@ -455,6 +470,7 @@ test('emit when not connected and queue overflows', async (t) => {
 test('subscribing and unsubscribing while not connected', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
 
   t.teardown(() => {
@@ -463,9 +479,9 @@ test('subscribing and unsubscribing while not connected', async (t) => {
 
   t.deepEqual(pubsub.queue, [])
   await new Promise(resolve => {
-    pubsub.emit({ topic: 'channel', payload: 'this-is-the-payload' }, resolve)
+    pubsub.emit({ topic: channel, payload: 'this-is-the-payload' }, resolve)
   })
-  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'this-is-the-payload', _retries: 0 }])
+  t.deepEqual(pubsub.queue, [{ topic: channel, payload: 'this-is-the-payload', _retries: 0 }])
 
   const state = { expected: 2, actual: 0 }
 
@@ -474,27 +490,27 @@ test('subscribing and unsubscribing while not connected', async (t) => {
     state.actual++
   }
 
-  pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
-  await pubsub.removeListener('channel', listener)
+  await pubsub.removeListener(channel, listener)
   t.deepEqual(pubsub.channels, {})
 
-  pubsub.on('channel', listener)
-  pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  pubsub.on(channel, listener)
+  pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
-  await pubsub.removeListener('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   await new Promise(resolve => {
-    pubsub.removeListener('channel', listener, resolve)
+    pubsub.removeListener(channel, listener, resolve)
   })
   t.deepEqual(pubsub.channels, {})
 
-  pubsub.on('channel', listener)
-  pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  pubsub.on(channel, listener)
+  pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
   await pubsub.connect()
   await waitUntilStateIsSatisfied(state)
@@ -503,6 +519,7 @@ test('subscribing and unsubscribing while not connected', async (t) => {
 test('emit with payload exceeding max size', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -511,7 +528,7 @@ test('emit with payload exceeding max size', async (t) => {
   })
 
   try {
-    pubsub.emit({ topic: 'channel', payload: 'a'.repeat(8000) })
+    pubsub.emit({ topic: channel, payload: 'a'.repeat(8000) })
   } catch (err) {
     t.is(err.message, 'Payload exceeds maximum size: 7999')
   }
@@ -520,6 +537,7 @@ test('emit with payload exceeding max size', async (t) => {
 test('emit with payload exceeding max size after escaping', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -529,7 +547,7 @@ test('emit with payload exceeding max size after escaping', async (t) => {
 
   try {
     // payload will grow twice as large due to escaping
-    pubsub.emit({ topic: 'channel', payload: '\''.repeat(5000) })
+    pubsub.emit({ topic: channel, payload: '\''.repeat(5000) })
   } catch (err) {
     t.is(err.message, 'Payload exceeds maximum size: 7999')
   }
@@ -538,6 +556,7 @@ test('emit with payload exceeding max size after escaping', async (t) => {
 test('continuously failing messages are dropped from queue', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   // intentionally increase max payload size above standard 8000 bytes
   const pubsub = new PGPubSub({
     db: dbConfig,
@@ -553,10 +572,10 @@ test('continuously failing messages are dropped from queue', async (t) => {
   t.deepEqual(pubsub.queue, [])
   // emit payload that's too large for a standard configuration of postgres
   // since we're not connected yet, it will just be added in message queue
-  await pubsub.emit({ topic: 'channel', payload: 'a'.repeat(10000) })
-  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'a'.repeat(10000), _retries: 0 }])
+  await pubsub.emit({ topic: channel, payload: 'a'.repeat(10000) })
+  t.deepEqual(pubsub.queue, [{ topic: channel, payload: 'a'.repeat(10000), _retries: 0 }])
 
-  await pubsub.on('channel', (_payload) => {
+  await pubsub.on(channel, (_payload) => {
     t.fail()
   })
 
@@ -571,6 +590,7 @@ test('continuously failing messages are dropped from queue', async (t) => {
 test('aborts flushing queue when connection is lost', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   // intentionally increase max payload size above standard 8000 bytes
   const pubsub = new PGPubSub({
     db: { ...dbConfig },
@@ -584,10 +604,10 @@ test('aborts flushing queue when connection is lost', async (t) => {
   t.deepEqual(pubsub.queue, [])
   // emit payload that's too large for a standard configuration of postgres
   // since we're not connected yet, it will just be added in message queue
-  await pubsub.emit({ topic: 'channel', payload: 'a'.repeat(10000) })
-  t.deepEqual(pubsub.queue, [{ topic: 'channel', payload: 'a'.repeat(10000), _retries: 0 }])
+  await pubsub.emit({ topic: channel, payload: 'a'.repeat(10000) })
+  t.deepEqual(pubsub.queue, [{ topic: channel, payload: 'a'.repeat(10000), _retries: 0 }])
 
-  await pubsub.on('channel', (_payload) => {
+  await pubsub.on(channel, (_payload) => {
     t.fail()
   })
 
@@ -609,6 +629,7 @@ test('aborts flushing queue when connection is lost', async (t) => {
 test('subscribing multiple times for same topic', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -620,28 +641,28 @@ test('subscribing multiple times for same topic', async (t) => {
 
   const state = { expected: 3, actual: 0 }
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
       state.actual++ // this should run twice
       resolve()
     })
 
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
       state.actual++
       resolve()
     })
 
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
 
   await waitUntilStateIsSatisfied(state)
 })
@@ -649,6 +670,7 @@ test('subscribing multiple times for same topic', async (t) => {
 test('attempting to subscribe when closing', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -657,27 +679,28 @@ test('attempting to subscribe when closing', async (t) => {
   })
 
   await new Promise(resolve => {
-    pubsub.on('channel', (payload) => {
+    pubsub.on(channel, (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
       resolve()
     })
 
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
   pubsub.close()
   t.deepEqual(pubsub.channels, {})
-  pubsub.on('channel', (_payload) => {
+  pubsub.on(channel, (_payload) => {
     t.fail()
   })
   t.deepEqual(pubsub.channels, {})
-  pubsub.emit('channel', 'this-is-the-payload')
+  pubsub.emit(channel, 'this-is-the-payload')
 })
 
 test('removing the only listener unlistens topic', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -688,12 +711,12 @@ test('removing the only listener unlistens topic', async (t) => {
   await new Promise(resolve => {
     const listener = (payload) => {
       t.deepEqual(payload, 'this-is-the-payload')
-      pubsub.removeListener('channel', listener, resolve)
+      pubsub.removeListener(channel, listener, resolve)
     }
 
-    pubsub.on('channel', listener)
-    t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.on(channel, listener)
+    t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
   t.deepEqual(pubsub.channels, {})
@@ -702,6 +725,7 @@ test('removing the only listener unlistens topic', async (t) => {
 test('reduces listener count when multiple listeners', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -716,23 +740,24 @@ test('reduces listener count when multiple listeners', async (t) => {
     state.actual++
   }
 
-  pubsub.on('channel', listener)
-  pubsub.on('channel', listener)
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
-  pubsub.emit('channel', 'this-is-the-payload')
+  pubsub.on(channel, listener)
+  pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
+  pubsub.emit(channel, 'this-is-the-payload')
 
   await waitUntilStateIsSatisfied(state)
 
   await new Promise(resolve => {
-    pubsub.removeListener('channel', listener, resolve)
+    pubsub.removeListener(channel, listener, resolve)
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 })
 
 test('callback is called when subscribing', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -748,29 +773,30 @@ test('callback is called when subscribing', async (t) => {
   }
 
   await new Promise(resolve => {
-    pubsub.on('channel', listener, resolve)
+    pubsub.on(channel, listener, resolve)
   })
 
   await new Promise(resolve => {
-    pubsub.on('channel', listener, resolve)
+    pubsub.on(channel, listener, resolve)
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 2 } })
-  pubsub.emit('channel', 'this-is-the-payload')
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
+  pubsub.emit(channel, 'this-is-the-payload')
 
   await waitUntilStateIsSatisfied(state)
 
   await new Promise(resolve => {
-    pubsub.removeListener('channel', listener, resolve)
+    pubsub.removeListener(channel, listener, resolve)
   })
 
-  t.deepEqual(pubsub.channels, { channel: { listeners: 1 } })
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 })
 
 test('removing unknown listener', async (t) => {
   t.timeout(2000)
   t.plan(2)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
@@ -784,12 +810,12 @@ test('removing unknown listener', async (t) => {
       pubsub.removeListener('some-other-channel', listener, resolve)
     }
 
-    pubsub.on('channel', listener)
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.on(channel, listener)
+    pubsub.emit(channel, 'this-is-the-payload')
   })
 
   return new Promise(resolve => {
-    pubsub.emit('channel', 'this-is-the-payload')
+    pubsub.emit(channel, 'this-is-the-payload')
     setTimeout(() => {
       resolve()
     }, 100)
@@ -799,17 +825,18 @@ test('removing unknown listener', async (t) => {
 test('reconnects automatically', async (t) => {
   t.timeout(2000)
 
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
 
   const state = { expected: 2, actual: 0 }
 
-  pubsub.on('channel', (payload) => {
+  pubsub.on(channel, (payload) => {
     t.deepEqual(payload, 'this-is-the-payload')
     state.actual++
   })
 
-  pubsub.emit('channel', 'this-is-the-payload')
+  pubsub.emit(channel, 'this-is-the-payload')
 
   const client = new pg.Client(dbConfig)
   await client.connect()
@@ -820,7 +847,7 @@ test('reconnects automatically', async (t) => {
     WHERE datname = current_database() AND pid <> pg_backend_pid();
   `)
 
-  pubsub.emit('channel', 'this-is-the-payload')
+  pubsub.emit(channel, 'this-is-the-payload')
 
   await waitUntilStateIsSatisfied(state)
 
@@ -839,9 +866,10 @@ test('calling close before connected', async (t) => {
 
 test('calling close removes listeners', async (t) => {
   t.timeout(2000)
+  const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
-  pubsub.on('topic', () => {})
-  t.is(pubsub.ee.listenerCount('topic'), 1)
+  pubsub.on(channel, () => {})
+  t.is(pubsub.ee.listenerCount(channel), 1)
   await pubsub.close()
-  t.is(pubsub.ee.listenerCount('topic'), 0)
+  t.is(pubsub.ee.listenerCount(channel), 0)
 })
