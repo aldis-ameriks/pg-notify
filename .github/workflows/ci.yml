@@ -17,16 +17,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: node --version
       - run: npm --version
+      - run: docker -v
+      - run: docker-compose -v
+      - run: docker-compose up -d
       - run: npm install
       - run: npm run lint
       - run: npm run test:types
       - run: npm run coverage
       - run: cat coverage/lcov.info | ./node_modules/.bin/coveralls
+      - run: docker-compose down
     env:
       CI: true
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_SSL: ${{ secrets.DB_SSL }}
+      DB_HOST: localhost
+      DB_PORT: 5433
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SSL: false
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
