@@ -47,8 +47,6 @@ function getChannel () {
 console.error = function () {}
 
 test('works with await', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -80,8 +78,6 @@ test('works with await', async (t) => {
 })
 
 test('works with callbacks', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -124,8 +120,6 @@ test('works with callbacks', async (t) => {
 })
 
 test('works when topic is in uppercase', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -157,8 +151,6 @@ test('works when topic is in uppercase', async (t) => {
 })
 
 test('works with concurrent emits', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -185,8 +177,6 @@ test('works with concurrent emits', async (t) => {
 })
 
 test('can emulate mqemitter api', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig, emulateMqEmitterApi: true })
   await pubsub.connect()
@@ -218,8 +208,6 @@ test('can emulate mqemitter api', async (t) => {
 })
 
 test('retries and throws when initial connection fails', async (t) => {
-  t.timeout(3000)
-
   const pubsub = new PGPubSub({
     reconnectMaxRetries: 10,
     reconnectDelay: 10,
@@ -240,8 +228,6 @@ test('retries and throws when initial connection fails', async (t) => {
 })
 
 test('connection can be re-established', async (t) => {
-  t.timeout(5000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({
     reconnectMaxRetries: 50,
@@ -307,8 +293,6 @@ test('connection can be re-established', async (t) => {
 })
 
 test('closing while reconnecting interrupts', async (t) => {
-  t.timeout(2000)
-
   const pubsub = new PGPubSub({
     reconnectMaxRetries: 10,
     reconnectDelay: 2000,
@@ -331,8 +315,6 @@ test('closing while reconnecting interrupts', async (t) => {
 })
 
 test('emit with callback', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -350,8 +332,6 @@ test('emit with callback', async (t) => {
 })
 
 test('emit with object payload', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -373,8 +353,6 @@ test('emit with object payload', async (t) => {
 })
 
 test('emit with object payload and simple api', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -396,8 +374,6 @@ test('emit with object payload and simple api', async (t) => {
 })
 
 test('emit when not connected', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
 
@@ -430,8 +406,6 @@ test('emit when not connected', async (t) => {
 })
 
 test('emit when not connected and queue overflows', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig, queueSize: 2 })
 
@@ -468,8 +442,6 @@ test('emit when not connected and queue overflows', async (t) => {
 })
 
 test('subscribing and unsubscribing while not connected', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
 
@@ -517,8 +489,6 @@ test('subscribing and unsubscribing while not connected', async (t) => {
 })
 
 test('emit with payload exceeding max size', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -535,8 +505,6 @@ test('emit with payload exceeding max size', async (t) => {
 })
 
 test('emit with payload exceeding max size after escaping', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -554,8 +522,6 @@ test('emit with payload exceeding max size after escaping', async (t) => {
 })
 
 test('continuously failing messages are dropped from queue', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   // intentionally increase max payload size above standard 8000 bytes
   const pubsub = new PGPubSub({
@@ -588,8 +554,6 @@ test('continuously failing messages are dropped from queue', async (t) => {
 })
 
 test('aborts flushing queue when connection is lost', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   // intentionally increase max payload size above standard 8000 bytes
   const pubsub = new PGPubSub({
@@ -627,8 +591,6 @@ test('aborts flushing queue when connection is lost', async (t) => {
 })
 
 test('subscribing multiple times for same topic', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -668,8 +630,6 @@ test('subscribing multiple times for same topic', async (t) => {
 })
 
 test('attempting to subscribe when closing', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -698,8 +658,6 @@ test('attempting to subscribe when closing', async (t) => {
 })
 
 test('removing the only listener unlistens topic', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -723,8 +681,6 @@ test('removing the only listener unlistens topic', async (t) => {
 })
 
 test('reduces listener count when multiple listeners', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -755,8 +711,6 @@ test('reduces listener count when multiple listeners', async (t) => {
 })
 
 test('callback is called when subscribing', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -793,7 +747,6 @@ test('callback is called when subscribing', async (t) => {
 })
 
 test('removing unknown listener', async (t) => {
-  t.timeout(2000)
   t.plan(2)
 
   const channel = getChannel()
@@ -823,8 +776,6 @@ test('removing unknown listener', async (t) => {
 })
 
 test('reconnects automatically', async (t) => {
-  t.timeout(2000)
-
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.connect()
@@ -858,14 +809,12 @@ test('reconnects automatically', async (t) => {
 })
 
 test('calling close before connected', async (t) => {
-  t.timeout(2000)
   const pubsub = new PGPubSub({ db: dbConfig })
   await pubsub.close()
   t.pass()
 })
 
 test('calling close removes listeners', async (t) => {
-  t.timeout(2000)
   const channel = getChannel()
   const pubsub = new PGPubSub({ db: dbConfig })
   pubsub.on(channel, () => {})
