@@ -266,7 +266,7 @@ test('connection can be re-established', async (t) => {
   await sleep(100)
 
   t.is(pubsub.state, 'reconnecting')
-  pubsub.opts.db.host = 'localhost'
+  pubsub.opts.db.host = process.env.DB_HOST
 
   let state = { expected: 'connected', actual: () => pubsub.state }
   await waitUntilStateIsSatisfied(state)
