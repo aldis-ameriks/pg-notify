@@ -23,6 +23,13 @@ This is a pre-release version, which does not follow semver. There can be breaki
 The first stable release will be released with v1.0.0.
 Use this at your own risk.
 
+
+## Features
+- Auto reconnect
+- Payload size validation
+- Channel and payload sanitization
+
+
 ## Install
 
 ```sh
@@ -39,9 +46,7 @@ const PGPubSub = require('pg-notify')
 // import PGPubSub from 'pg-notify
 
 ;(async () => {
-  const pubsub = new PGPubSub({
-    db: { connectionString: 'postgres://postgres:postgres@localhost:5432/db' }
-  })
+  const pubsub = new PGPubSub({ connectionString: 'postgres://postgres:postgres@localhost:5432/db' })
 
   await pubsub.connect()
 
