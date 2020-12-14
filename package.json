@@ -29,19 +29,19 @@
     "url": "https://github.com/aldis-ameriks/pg-notify/issues"
   },
   "dependencies": {
-    "debug": "^4.2.0",
-    "pg": "^8.4.1",
+    "debug": "^4.3.1",
+    "pg": "^8.5.1",
     "pg-format": "^1.0.4",
     "secure-json-parse": "^2.1.0"
   },
   "devDependencies": {
-    "@types/pg": "^7.14.5",
-    "ava": "^3.13.0",
+    "@types/pg": "^7.14.7",
+    "ava": "^3.14.0",
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.0",
     "dotenv": "^8.2.0",
     "nyc": "^15.1.0",
-    "standard": "^16.0.0",
+    "standard": "^16.0.3",
     "tsd": "^0.14.0"
   },
   "tsd": {
