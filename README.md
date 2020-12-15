@@ -41,12 +41,16 @@ yarn add pg-notify
 
 ## Usage
 
+> PGPubSub accepts the same config as [pg](https://github.com/brianc/node-postgres).
+
 ```js
 const PGPubSub = require('pg-notify')
 // import PGPubSub from 'pg-notify
 
 ;(async () => {
-  const pubsub = new PGPubSub({ connectionString: 'postgres://postgres:postgres@localhost:5432/db' })
+  const pubsub = new PGPubSub({ 
+    connectionString: 'postgres://postgres:postgres@localhost:5432/db'
+  })
 
   await pubsub.connect()
 
