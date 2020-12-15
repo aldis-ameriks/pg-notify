@@ -3,25 +3,15 @@ import { expectError } from 'tsd'
 import PGPubSub from '../..'
 
 new PGPubSub({
-  continuousEmitFailureThreshold: 1,
-  emitThrottleDelay: 1,
-  maxEmitRetries: 1,
   maxPayloadSize: 1,
-  reconnectDelay: 1,
   reconnectMaxRetries: 1,
-  queueSize: 1,
-  emulateMqEmitterApi: true,
   db: {
     connectionString: 'connection string'
   }
 })
 
 new PGPubSub({
-  continuousEmitFailureThreshold: 1,
-  emitThrottleDelay: 1,
-  maxEmitRetries: 1,
   maxPayloadSize: 1,
-  reconnectDelay: 1,
   reconnectMaxRetries: 1,
   db: {
     host: 'host',
