@@ -205,51 +205,39 @@ test('connection can be re-established', async (t) => {
   })
 })
 
-test.skip('connection cannot be re-established', async (t) => {
-  await t.throwsAsync(async () => {
-    const channel = getChannel()
-    const pubsub = new PGPubSub({
-      reconnectMaxRetries: 1,
-      db: { ...dbConfig }
+test('connection cannot be re-established', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub({
+    reconnectMaxRetries: 1,
+    db: { ...dbConfig }
+  })
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.deepEqual(payload, 'this-is-the-payload')
+      resolve()
     })
+    pubsub.emit(channel, 'this-is-the-payload')
+  })
 
-    await pubsub.connect()
-    t.is(pubsub.state, 'connected')
+  try {
+    // emulate pg client emitting an error
+    pubsub.reconnectRetries = 2
+    await pubsub.client.emit('error', new Error('connection reset'))
+    t.fail()
+  } catch (e) {}
 
-    await new Promise(resolve => {
-      pubsub.on(channel, (payload) => {
-        t.deepEqual(payload, 'this-is-the-payload')
-        resolve()
-      })
+  await sleep(1)
 
-      pubsub.emit(channel, 'this-is-the-payload')
-    })
+  await waitUntilTrue(() => pubsub.state === 'closing')
 
-    const client = new pg.Client({ ...dbConfig })
-    await client.connect()
-
-    pubsub.opts.db.host = 'xxx'
-    pubsub.reconnectRetries = 100
-
-    await client.query(`
-      SELECT pg_terminate_backend(pg_stat_activity.pid)
-      FROM pg_stat_activity
-      WHERE datname = current_database()
-        AND pid <> pg_backend_pid();
-  `)
-
-    await sleep(1)
-
-    await waitUntilTrue(() => pubsub.state === 'closing')
-
-    t.teardown(() => {
-      if (pubsub.close) {
-        pubsub.close()
-      }
-      if (client) {
-        client.end()
-      }
-    })
+  t.teardown(() => {
+    if (pubsub.close) {
+      pubsub.close()
+    }
   })
 })
 
