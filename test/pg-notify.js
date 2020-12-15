@@ -9,7 +9,7 @@ const PGPubSub = require('../lib/pg-notify')
 
 const sleep = util.promisify(setTimeout)
 
-const dbConfig = {
+const opts = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
@@ -37,7 +37,7 @@ console.error = function () {}
 
 test('works with await', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -68,7 +68,7 @@ test('works with await', async (t) => {
 
 test('works when topic is in uppercase', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -99,7 +99,7 @@ test('works when topic is in uppercase', async (t) => {
 
 test('works with concurrent emits', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -126,8 +126,9 @@ test('works with concurrent emits', async (t) => {
 
 test('retries and throws when initial connection fails', async (t) => {
   const pubsub = new PGPubSub({
+    ...opts,
     reconnectMaxRetries: 10,
-    db: { ...dbConfig, host: 'xxx' }
+    host: 'xxx'
   })
 
   try {
@@ -146,8 +147,8 @@ test('retries and throws when initial connection fails', async (t) => {
 test('connection can be re-established', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub({
-    reconnectMaxRetries: 10000,
-    db: dbConfig
+    ...opts,
+    reconnectMaxRetries: 10000
   })
 
   await pubsub.connect()
@@ -162,10 +163,10 @@ test('connection can be re-established', async (t) => {
     pubsub.emit(channel, 'this-is-the-payload')
   })
 
-  const client = new pg.Client({ ...dbConfig })
+  const client = new pg.Client({ ...opts })
   await client.connect()
 
-  pubsub.opts.db.host = 'xxx'
+  pubsub.opts.host = 'xxx'
 
   await client.query(`
       SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -177,7 +178,7 @@ test('connection can be re-established', async (t) => {
   await sleep(100)
 
   t.is(pubsub.state, 'reconnecting')
-  pubsub.opts.db.host = process.env.DB_HOST
+  pubsub.opts.host = process.env.DB_HOST
 
   await waitUntilTrue(() => pubsub.state === 'connected')
   await pubsub.emit(channel, 'this-is-the-payload')
@@ -208,8 +209,8 @@ test('connection can be re-established', async (t) => {
 test('connection cannot be re-established', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub({
-    reconnectMaxRetries: 1,
-    db: { ...dbConfig }
+    ...opts,
+    reconnectMaxRetries: 1
   })
 
   await pubsub.connect()
@@ -243,8 +244,9 @@ test('connection cannot be re-established', async (t) => {
 
 test('closing while reconnecting interrupts', async (t) => {
   const pubsub = new PGPubSub({
+    ...opts,
     reconnectMaxRetries: 100,
-    db: { ...dbConfig, host: 'xxx' }
+    host: 'xxx'
   })
 
   // omit await
@@ -263,7 +265,7 @@ test('closing while reconnecting interrupts', async (t) => {
 
 test('emit with object payload', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -284,7 +286,7 @@ test('emit with object payload', async (t) => {
 
 test('emit when not connected', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
 
   t.teardown(() => {
     pubsub.close()
@@ -299,7 +301,7 @@ test('emit when not connected', async (t) => {
 
 test('subscribing while not connected', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
 
   t.teardown(() => {
     pubsub.close()
@@ -314,7 +316,7 @@ test('subscribing while not connected', async (t) => {
 
 test('emit with payload exceeding max size', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -330,7 +332,7 @@ test('emit with payload exceeding max size', async (t) => {
 
 test('emit with payload exceeding max size after escaping', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -347,7 +349,7 @@ test('emit with payload exceeding max size after escaping', async (t) => {
 
 test('subscribing multiple times for same topic', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -386,7 +388,7 @@ test('subscribing multiple times for same topic', async (t) => {
 
 test('attempting to subscribe when closing', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig, reconnectRetries: 10000 })
+  const pubsub = new PGPubSub({ ...opts, reconnectRetries: 10000 })
   await pubsub.connect()
 
   t.teardown(() => {
@@ -416,7 +418,7 @@ test('attempting to subscribe when closing', async (t) => {
 
 test('removing the only listener unlistens topic', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -436,7 +438,7 @@ test('removing the only listener unlistens topic', async (t) => {
 
 test('reduces listener count when multiple listeners', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -465,7 +467,7 @@ test('removing unknown listener', async (t) => {
   t.plan(2)
 
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   t.teardown(() => {
@@ -490,7 +492,7 @@ test('removing unknown listener', async (t) => {
 
 test('reconnects automatically', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
 
   let emitCount = 0
@@ -502,7 +504,7 @@ test('reconnects automatically', async (t) => {
 
   await pubsub.emit(channel, 'this-is-the-payload')
 
-  const client = new pg.Client(dbConfig)
+  const client = new pg.Client(opts)
   await client.connect()
   await client.query(`
       SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -524,13 +526,13 @@ test('reconnects automatically', async (t) => {
 })
 
 test('calling close before connected', async (t) => {
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.close()
   t.pass()
 })
 
 test('calling reconnect while closing', async (t) => {
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.close()
   await pubsub._reconnect()
   t.pass()
@@ -538,7 +540,7 @@ test('calling reconnect while closing', async (t) => {
 
 test('calling close removes listeners', async (t) => {
   const channel = getChannel()
-  const pubsub = new PGPubSub({ db: dbConfig })
+  const pubsub = new PGPubSub(opts)
   await pubsub.connect()
   await pubsub.on(channel, () => {})
   t.is(pubsub.ee.listenerCount(channel), 1)

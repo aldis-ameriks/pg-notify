@@ -1,9 +1,8 @@
 import { ClientConfig } from 'pg'
 
-export interface Options {
+export interface Options extends ClientConfig {
   reconnectMaxRetries?: number;
   maxPayloadSize?: number;
-  db: ClientConfig;
 }
 
 declare class PGPubSub {
