@@ -63,6 +63,32 @@ const PGPubSub = require('pg-notify')
 })()
 ```
 
+## API
+
+### new PubSub(options)
+#### options
+Type: `object`
+
+Accepts same options as [pg](https://github.com/brianc/node-postgres) with few custom ones.
+
+##### options.reconnectMaxRetries
+Type: `number`
+
+Default: `10`
+
+##### options.maxPayloadSize
+Type: `number`
+
+Default: `7999`
+
+[In the default configuration it must be shorter than 8000 bytes.](https://www.postgresql.org/docs/current/sql-notify.html)
+
+### emit(channel, payload)
+### on(channel, listener)
+### removeListener(listener)
+### close()
+### connect()
+
 ## Contributing
 
 Contributions, issues and feature requests are welcome!
