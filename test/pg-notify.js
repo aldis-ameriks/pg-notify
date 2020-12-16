@@ -245,7 +245,7 @@ test('connection cannot be re-established', async (t) => {
 test('closing while reconnecting interrupts', async (t) => {
   const pubsub = new PGPubSub({
     ...opts,
-    reconnectMaxRetries: 100,
+    reconnectMaxRetries: 10000,
     host: 'xxx'
   })
 
@@ -255,7 +255,7 @@ test('closing while reconnecting interrupts', async (t) => {
   pubsub.close()
 
   t.true(pubsub.reconnectRetries > 5)
-  t.true(pubsub.reconnectRetries < 100)
+  t.true(pubsub.reconnectRetries < 10000)
   t.is(pubsub.state, 'closing')
 
   t.teardown(() => {
