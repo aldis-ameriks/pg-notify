@@ -32,11 +32,11 @@
     "debug": "^4.3.1",
     "pg": "^8.5.1",
     "pg-format": "^1.0.4",
-    "secure-json-parse": "^2.1.0"
+    "secure-json-parse": "^2.3.0"
   },
   "devDependencies": {
-    "@types/pg": "^7.14.7",
-    "ava": "^3.14.0",
+    "@types/pg": "^7.14.9",
+    "ava": "^3.15.0",
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.0",
     "dotenv": "^8.2.0",
