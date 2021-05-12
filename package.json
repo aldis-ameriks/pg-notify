@@ -42,7 +42,7 @@
     "dotenv": "^8.2.0",
     "nyc": "^15.1.0",
     "standard": "^16.0.3",
-    "tsd": "^0.14.0"
+    "tsd": "^0.15.1"
   },
   "tsd": {
     "directory": "test/types"
