@@ -35,7 +35,7 @@
     "secure-json-parse": "^2.3.0"
   },
   "devDependencies": {
-    "@types/pg": "^7.14.9",
+    "@types/pg": "^8.6.0",
     "ava": "^3.15.0",
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.0",
