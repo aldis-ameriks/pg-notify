@@ -72,10 +72,10 @@ const PGPubSub = require('pg-notify')
 
 ### on(channel, listener)
 - `channel` (`string`)
-- `listener` (`function`) accepting single argument `payload`
+- `listener` (`function` accepting single argument `payload`)
 
 ### removeListener(listener)
-- `listener` (`function`) accepting single argument `payload`
+- `listener` (`function` accepting single argument `payload`)
 
 ### close()
 ### connect()
