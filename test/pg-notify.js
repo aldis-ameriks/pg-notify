@@ -242,6 +242,94 @@ test('connection cannot be re-established', async (t) => {
   })
 })
 
+test('disabled reconnection with zero', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub({
+    ...opts,
+    reconnectMaxRetries: 0
+  })
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.deepEqual(payload, 'this-is-the-payload')
+      resolve()
+    })
+
+    pubsub.emit(channel, 'this-is-the-payload')
+  })
+
+  const client = new pg.Client({ ...opts })
+  await client.connect()
+
+  pubsub.opts.host = 'xxx'
+
+  await client.query(`
+      SELECT pg_terminate_backend(pg_stat_activity.pid)
+      FROM pg_stat_activity
+      WHERE datname = current_database()
+        AND pid <> pg_backend_pid();
+  `)
+
+  await sleep(100)
+  t.is(pubsub.state, 'closing')
+
+  t.teardown(() => {
+    if (pubsub.close) {
+      pubsub.close()
+    }
+    if (client) {
+      client.end()
+    }
+  })
+})
+
+test('disabled reconnection with null', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub({
+    ...opts,
+    reconnectMaxRetries: null
+  })
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.deepEqual(payload, 'this-is-the-payload')
+      resolve()
+    })
+
+    pubsub.emit(channel, 'this-is-the-payload')
+  })
+
+  const client = new pg.Client({ ...opts })
+  await client.connect()
+
+  pubsub.opts.host = 'xxx'
+
+  await client.query(`
+      SELECT pg_terminate_backend(pg_stat_activity.pid)
+      FROM pg_stat_activity
+      WHERE datname = current_database()
+        AND pid <> pg_backend_pid();
+  `)
+
+  await sleep(100)
+  t.is(pubsub.state, 'closing')
+
+  t.teardown(() => {
+    if (pubsub.close) {
+      pubsub.close()
+    }
+    if (client) {
+      client.end()
+    }
+  })
+})
+
 test('closing while reconnecting interrupts', async (t) => {
   const pubsub = new PGPubSub({
     ...opts,

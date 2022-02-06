@@ -63,7 +63,7 @@ const PGPubSub = require('pg-notify')
 
 ### new PubSub(options)
 - `options` (`object`) Configuration options for pg-notify pubsub instance. Accepts same options as [pg](https://github.com/brianc/node-postgres) with few custom ones described below.
-    - reconnectMaxRetries (`number`) Maximum number of reconnect attempts after losing connection. Default: `10`.
+    - reconnectMaxRetries (`number`) Maximum number of reconnect attempts after losing connection. Pass `0` to disable reconnecting. Default: `10`.
     - maxPayloadSize (`number`) Maximum payload size, exceeding given size will throw an error. Default: `7999` ([In the default configuration it must be shorter than 8000 bytes.](https://www.postgresql.org/docs/current/sql-notify.html)).
 
 ### emit(channel, payload)
