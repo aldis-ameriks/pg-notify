@@ -1,5 +1,5 @@
 *
-!lib/*
+!src/*
 !index.js
 !index.d.ts
 !package.json

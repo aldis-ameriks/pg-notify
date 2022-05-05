@@ -1,5 +1,5 @@
 'use strict'
 
-const PGPubSub = require('./lib/pg-notify')
+const PGPubSub = require('./src/pg-notify')
 
 module.exports = PGPubSub

@@ -6,7 +6,7 @@ const pg = require('pg')
 const assert = require('assert').strict
 const Benchmark = require('benchmark')
 
-const PGPubSub = require('./lib/pg-notify')
+const PGPubSub = require('./src/pg-notify')
 const suite = new Benchmark.Suite()
 const sleep = util.promisify(setTimeout)
 const iterations = 100
