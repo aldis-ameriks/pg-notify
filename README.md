@@ -45,7 +45,7 @@ pnpm add pg-notify
 
 ```js
 const PGPubSub = require('pg-notify')
-// import PGPubSub from 'pg-notify
+// import PGPubSub from 'pg-notify'
 
 ;(async () => {
   const pubsub = new PGPubSub({ 
