@@ -35,6 +35,10 @@ npm install pg-notify
 yarn add pg-notify
 ```
 
+```sh
+pnpm add pg-notify
+```
+
 ## Usage
 
 > PGPubSub accepts the same config as [pg](https://github.com/brianc/node-postgres).
@@ -56,6 +60,8 @@ const PGPubSub = require('pg-notify')
 
   await pubsub.emit('test', 'this is the payload')
   await pubsub.emit('test', { foo: 'bar' })
+
+  await pubsub.close()
 })()
 ```
 
