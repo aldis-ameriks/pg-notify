@@ -30,18 +30,18 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "pg": "^8.10.0",
+    "pg": "^8.11.0",
     "pg-format": "^1.0.4",
     "secure-json-parse": "^2.7.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.6.6",
-    "ava": "^5.2.0",
+    "@types/pg": "^8.10.2",
+    "ava": "^5.3.1",
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.1",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.0",
     "nyc": "^15.1.0",
-    "standard": "^17.0.0",
+    "standard": "^17.1.0",
     "tsd": "^0.28.1"
   },
   "tsd": {
