@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "pg": "^8.11.0",
+    "pg": "^8.11.2",
     "pg-format": "^1.0.4",
     "secure-json-parse": "^2.7.0"
   },
@@ -51,7 +51,7 @@
     "ava": "^5.3.1",
     "benchmark": "^2.1.4",
     "coveralls": "^3.1.1",
-    "dotenv": "^16.3.0",
+    "dotenv": "^16.3.1",
     "nyc": "^15.1.0",
     "standard": "^17.1.0",
     "tsd": "^0.28.1"
