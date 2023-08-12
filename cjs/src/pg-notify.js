@@ -1,9 +1,9 @@
-import EventEmitter from 'node:events'
-import util from 'node:util'
-import pg from 'pg'
-import format from 'pg-format'
-import sjson from 'secure-json-parse'
-import Debug from 'debug'
+const EventEmitter = require('node:events')
+const util = require('node:util')
+const pg = require('pg')
+const format = require('pg-format')
+const sjson = require('secure-json-parse')
+const Debug = require('debug')
 
 const debug = Debug('pg-notify')
 const sleep = util.promisify(setTimeout)
@@ -174,4 +174,4 @@ class PGPubSub {
   }
 }
 
-export default PGPubSub
+module.exports = PGPubSub

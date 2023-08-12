@@ -44,8 +44,8 @@ pnpm add pg-notify
 > PGPubSub accepts the same config as [pg](https://github.com/brianc/node-postgres).
 
 ```js
-const PGPubSub = require('pg-notify')
-// import PGPubSub from 'pg-notify'
+import PGPubSub from 'pg-notify'
+//const PGPubSub = require('pg-notify')
 
 ;(async () => {
   const pubsub = new PGPubSub({ 

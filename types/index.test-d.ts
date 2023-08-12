@@ -1,5 +1,5 @@
 /* eslint-disable */
-import PGPubSub from '../..'
+import PGPubSub from '.'
 
 new PGPubSub({
   maxPayloadSize: 1,

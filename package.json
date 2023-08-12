@@ -2,13 +2,25 @@
   "name": "pg-notify",
   "version": "0.0.21",
   "description": "Postgres pubsub client",
-  "main": "index.js",
+  "type": "module",
+  "module": "src/index.js",
+  "main": "cjs/src/index.js",
+  "exports": {
+    "types": "./types/index.d.ts",
+    "import": "./src/index.js",
+    "default": "./cjs/src/index.js"
+  },
+  "types": "types/index.d.ts",
+  "typings": "types/index.d.ts",
   "scripts": {
-    "test": "ava --serial",
+    "test": "ava --serial test/**",
+    "test:cjs": "ava --serial cjs/test/**",
     "test:types": "tsd",
-    "test:all": "npm run lint && npm run test && npm run test:types",
+    "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:types",
     "lint": "standard",
-    "coverage": "nyc --reporter=lcov --reporter=text ava --serial"
+    "lint:fix": "standard --fix",
+    "coverage": "nyc --reporter=lcov --reporter=text ava --serial",
+    "transpile:cjs": "node ./transpile.cjs.js && npm run lint:fix"
   },
   "author": "Aldis Ameriks <aldis.ameriks@gmail.com>",
   "keywords": [
@@ -45,6 +57,6 @@
     "tsd": "^0.28.1"
   },
   "tsd": {
-    "directory": "test/types"
+    "directory": "types"
   }
 }

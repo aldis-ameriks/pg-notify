@@ -1,9 +1,9 @@
-import 'dotenv/config'
+require('dotenv/config')
 
-import test from 'ava'
-import pg from 'pg'
-import util from 'node:util'
-import PGPubSub from '../src/pg-notify.js'
+const test = require('ava')
+const pg = require('pg')
+const util = require('node:util')
+const PGPubSub = require('../src/pg-notify.js')
 
 const sleep = util.promisify(setTimeout)
 

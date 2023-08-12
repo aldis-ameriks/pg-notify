@@ -1,12 +1,11 @@
-'use strict'
+import 'dotenv/config'
 
-require('dotenv').config()
-const util = require('util')
-const pg = require('pg')
-const assert = require('assert').strict
-const Benchmark = require('benchmark')
+import util from 'node:util'
+import pg from 'pg'
+import assert from 'node:assert/strict'
+import Benchmark from 'benchmark'
+import PGPubSub from './src/pg-notify.js'
 
-const PGPubSub = require('./src/pg-notify')
 const suite = new Benchmark.Suite()
 const sleep = util.promisify(setTimeout)
 const iterations = 100
