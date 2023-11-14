@@ -42,19 +42,19 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "pg": "^8.11.2",
+    "pg": "^8.11.3",
     "pg-format": "^1.0.4",
     "secure-json-parse": "^2.7.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.10.2",
+    "@types/pg": "^8.10.9",
     "ava": "^5.3.1",
     "benchmark": "^2.1.4",
     "c8": "8.0.1",
     "coveralls": "^3.1.1",
     "dotenv": "^16.3.1",
     "standard": "^17.1.0",
-    "tsd": "^0.28.1"
+    "tsd": "^0.29.0"
   },
   "tsd": {
     "directory": "types"
