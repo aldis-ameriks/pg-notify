@@ -3,9 +3,7 @@ const util = require('node:util')
 const pg = require('pg')
 const format = require('pg-format')
 const sjson = require('secure-json-parse')
-const Debug = require('debug')
 
-const debug = Debug('pg-notify')
 const sleep = util.promisify(setTimeout)
 
 const states = {
@@ -27,6 +25,8 @@ class PGPubSub {
     this.state = states.init
     this.reconnectRetries = 0
     this.channels = {}
+    /* c8 ignore next */
+    this.debug = process.env.DEBUG && process.env.DEBUG.includes('pg-notify')
   }
 
   async emit (channel, payload) {
@@ -44,15 +44,15 @@ class PGPubSub {
       throw new Error(`[PGPubSub]: payload exceeds maximum size: ${this.maxPayloadSize}`)
     }
 
-    debug('[emit] channel: ', channel)
-    debug('[emit] payload: ', payload)
-    debug('[emit] state: ', this.state)
+    this._debug('[emit] channel: ', channel)
+    this._debug('[emit] payload: ', payload)
+    this._debug('[emit] state: ', this.state)
 
     return this.client.query(`NOTIFY ${format.ident(channel)}, ${parsedPayload}`)
   }
 
   async on (channel, listener) {
-    debug('[subscribe]', channel)
+    this._debug('[subscribe]', channel)
     if (this.state !== states.connected) {
       throw new Error('[PGPubSub]: not connected')
     }
@@ -107,7 +107,7 @@ class PGPubSub {
   }
 
   async _reconnect (force) {
-    debug('[_reconnect] state: ', this.state)
+    this._debug('[_reconnect] state: ', this.state)
 
     if (!this.reconnectMaxRetries) {
       this.close()
@@ -141,7 +141,7 @@ class PGPubSub {
     await this.client.connect()
 
     this.client.on('notification', (message) => {
-      debug('[_setupClient] notification', message)
+      this._debug('[_setupClient] notification', message)
 
       try {
         message.payload = sjson.parse(message.payload)
@@ -151,7 +151,7 @@ class PGPubSub {
     })
 
     this.client.on('error', err => {
-      debug('[_setupClient] error')
+      this._debug('[_setupClient] error')
 
       if (this.reconnectRetries > this.reconnectMaxRetries) {
         this.close()
@@ -161,7 +161,7 @@ class PGPubSub {
       this._reconnect()
     })
 
-    debug('[_setupClient] init listeners')
+    this._debug('[_setupClient] init listeners')
     if (Object.keys(this.channels).length) {
       for (const channel in this.channels) {
         await this.client.query(`LISTEN ${format.ident(channel)}`)
@@ -170,7 +170,14 @@ class PGPubSub {
 
     this.state = states.connected
     this.reconnectRetries = 0
-    debug('[_setupClient] init listeners done')
+    this._debug('[_setupClient] init listeners done')
+  }
+
+  _debug (...args) {
+    /* c8 ignore next 3 */
+    if (this.debug) {
+      console.log(...args)
+    }
   }
 }
 

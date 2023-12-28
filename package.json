@@ -41,7 +41,6 @@
     "url": "https://github.com/aldis-ameriks/pg-notify/issues"
   },
   "dependencies": {
-    "debug": "^4.3.4",
     "pg": "^8.11.3",
     "pg-format": "^1.0.4",
     "secure-json-parse": "^2.7.0"
