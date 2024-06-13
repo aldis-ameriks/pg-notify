@@ -110,7 +110,7 @@ class PGPubSub {
     this._debug('[_reconnect] state: ', this.state)
 
     if (!this.reconnectMaxRetries) {
-      this.close()
+      await this.close()
       return
     }
 
@@ -122,11 +122,11 @@ class PGPubSub {
     this.reconnectRetries++
 
     try {
-      this.client.end()
+      await this.client.end()
       await this._setupClient()
     } catch (err) {
       if (this.reconnectRetries >= this.reconnectMaxRetries) {
-        this.close()
+        await this.close()
         throw new Error('[PGPubSub]: max reconnect attempts reached, aborting', err)
       }
       if (![states.closing, states.connected].includes((this.state))) {
