@@ -18,14 +18,14 @@ jobs:
       - run: node --version
       - run: npm --version
       - run: docker -v
-      - run: docker-compose -v
-      - run: docker-compose up -d
+      - run: docker compose -v
+      - run: docker compose up -d
       - run: npm install
       - run: npm run lint
       - run: npm run test:types
       - run: npm run coverage
       - run: cat coverage/lcov.info | ./node_modules/.bin/coveralls
-      - run: docker-compose down
+      - run: docker compose down
     env:
       CI: true
       DB_HOST: localhost
