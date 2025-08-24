@@ -151,7 +151,7 @@ class PGPubSub {
     })
 
     this.client.on('error', err => {
-      this._debug('[_setupClient] error')
+      this._debug('[_setupClient] error', err)
 
       if (this.reconnectRetries > this.reconnectMaxRetries) {
         this.close()
