@@ -30,7 +30,7 @@ class PGPubSub {
     this.reconnectRetries = 0
     this.channels = {}
     /* c8 ignore next */
-    this.debug = process.env.DEBUG && process.env.DEBUG.includes('pg-notify')
+    this.debug = opts.debug || (process.env.DEBUG && process.env.DEBUG.includes('pg-notify'))
   }
 
   async emit (channel, payload) {

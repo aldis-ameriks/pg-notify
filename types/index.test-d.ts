@@ -15,3 +15,8 @@ new PGPubSub({
   port: 5432,
   user: 'user'
 })
+
+new PGPubSub({
+  debug: true,
+  connectionString: 'connection string'
+})
