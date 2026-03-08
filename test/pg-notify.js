@@ -831,13 +831,16 @@ test('removeListener while disconnected cleans up state without UNLISTEN', async
   await pubsub.on(channel, listener)
   t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 
-  // simulate disconnected state
+  // simulate disconnected state, but keep client ref for cleanup
+  const client = pubsub.client
   pubsub.state = 'init'
   pubsub.client = null
 
   await pubsub.removeListener(channel, listener)
   t.deepEqual(pubsub.channels, {})
   t.is(pubsub.ee.listenerCount(channel), 0)
+
+  await client.end()
 })
 
 test('removeListener while reconnecting cleans up state without UNLISTEN', async (t) => {
@@ -882,6 +885,27 @@ test('removeListener decrements count without UNLISTEN when not connected', asyn
   await pubsub.removeListener(channel, listener1)
   t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
   t.is(pubsub.ee.listenerCount(channel), 1)
+
+  // reset state so teardown close() can properly end the connection
+  pubsub.state = 'connected'
+})
+
+test('off() is an alias for removeListener()', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const listener = () => {}
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+
+  await pubsub.off(channel, listener)
+  t.deepEqual(pubsub.channels, {})
+  t.is(pubsub.ee.listenerCount(channel), 0)
 })
 
 test('calling close removes listeners', async (t) => {
