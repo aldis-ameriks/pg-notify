@@ -818,6 +818,72 @@ test('calling reconnect while closing', async (t) => {
   t.pass()
 })
 
+test('removeListener while disconnected cleans up state without UNLISTEN', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const listener = () => {}
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+
+  // simulate disconnected state
+  pubsub.state = 'init'
+  pubsub.client = null
+
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, {})
+  t.is(pubsub.ee.listenerCount(channel), 0)
+})
+
+test('removeListener while reconnecting cleans up state without UNLISTEN', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const listener = () => {}
+  await pubsub.on(channel, listener)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+
+  // simulate reconnecting state
+  pubsub.state = 'reconnecting'
+
+  await pubsub.removeListener(channel, listener)
+  t.deepEqual(pubsub.channels, {})
+  t.is(pubsub.ee.listenerCount(channel), 0)
+})
+
+test('removeListener decrements count without UNLISTEN when not connected', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const listener1 = () => {}
+  const listener2 = () => {}
+  await pubsub.on(channel, listener1)
+  await pubsub.on(channel, listener2)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
+
+  // simulate disconnected state
+  pubsub.state = 'closing'
+
+  await pubsub.removeListener(channel, listener1)
+  t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+  t.is(pubsub.ee.listenerCount(channel), 1)
+})
+
 test('calling close removes listeners', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub(opts)

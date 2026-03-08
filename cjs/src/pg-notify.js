@@ -87,7 +87,9 @@ class PGPubSub {
 
     if (this.channels[channel].listeners === 0) {
       delete this.channels[channel]
-      return this.client.query(`UNLISTEN ${format.ident(channel)}`)
+      if (this.state === states.connected) {
+        return this.client.query(`UNLISTEN ${format.ident(channel)}`)
+      }
     }
   }
 
