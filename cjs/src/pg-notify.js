@@ -20,7 +20,7 @@ class PGPubSub {
     this.ee.setMaxListeners(0)
 
     this.reconnectMaxRetries = typeof opts.reconnectMaxRetries !== 'undefined' ? opts.reconnectMaxRetries : 10
-    this.maxPayloadSize = opts.maxPayloadSize || 7999 // default on a standard pg installation
+    this.maxPayloadSize = typeof opts.maxPayloadSize !== 'undefined' ? opts.maxPayloadSize : 7999 // default on a standard pg installation
     if (opts.onConnectionError && typeof opts.onConnectionError !== 'function') {
       throw new TypeError('onConnectionError must be a function')
     }

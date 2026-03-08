@@ -908,6 +908,11 @@ test('off() is an alias for removeListener()', async (t) => {
   t.is(pubsub.ee.listenerCount(channel), 0)
 })
 
+test('maxPayloadSize accepts 0 as a valid value', (t) => {
+  const pubsub = new PGPubSub({ ...opts, maxPayloadSize: 0 })
+  t.is(pubsub.maxPayloadSize, 0)
+})
+
 test('calling close removes listeners', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub(opts)
