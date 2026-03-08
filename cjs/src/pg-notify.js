@@ -77,6 +77,10 @@ class PGPubSub {
     this.channels[channel] = { listeners: 1 }
   }
 
+  async off (channel, listener) {
+    return this.removeListener(channel, listener)
+  }
+
   async removeListener (channel, listener) {
     if (!this.channels[channel]) {
       return
