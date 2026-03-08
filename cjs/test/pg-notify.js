@@ -740,6 +740,33 @@ test('reconnects automatically', async (t) => {
   })
 })
 
+test('connect() on already-connected instance closes previous connection', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  const oldClient = pubsub.client
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+  t.true(oldClient._ending, 'old client should have been closed')
+  t.not(pubsub.client, oldClient, 'should have a new client')
+
+  // verify the new connection works
+  let received = false
+  await pubsub.on(channel, (payload) => {
+    t.deepEqual(payload, 'test')
+    received = true
+  })
+  await pubsub.emit(channel, 'test')
+  await waitUntilTrue(() => received)
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+})
+
 test('calling close before connected', async (t) => {
   const pubsub = new PGPubSub(opts)
   await pubsub.close()

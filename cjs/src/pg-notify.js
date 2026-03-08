@@ -89,6 +89,11 @@ class PGPubSub {
 
   async connect () {
     this.reconnectRetries = 0
+
+    if (this.client) {
+      try { await this.client.end() } catch {}
+    }
+
     this.state = states.init
 
     try {
