@@ -38,6 +38,14 @@ class PGPubSub {
       throw new Error('[PGPubSub]: not connected')
     }
 
+    this._debug('[emit] channel: ', channel)
+    this._debug('[emit] payload: ', payload)
+    this._debug('[emit] state: ', this.state)
+
+    if (payload == null) {
+      return this.client.query(`NOTIFY ${format.ident(channel)}`)
+    }
+
     if (typeof payload === 'object') {
       payload = JSON.stringify(payload)
     }
@@ -47,10 +55,6 @@ class PGPubSub {
     if (Buffer.byteLength(parsedPayload, 'utf-8') > this.maxPayloadSize) {
       throw new Error(`[PGPubSub]: payload exceeds maximum size: ${this.maxPayloadSize}`)
     }
-
-    this._debug('[emit] channel: ', channel)
-    this._debug('[emit] payload: ', payload)
-    this._debug('[emit] state: ', this.state)
 
     return this.client.query(`NOTIFY ${format.ident(channel)}, ${parsedPayload}`)
   }

@@ -475,6 +475,44 @@ test('emit with object payload', async (t) => {
   t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
 })
 
+test('emit with null payload sends no payload', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.is(payload, '')
+      resolve()
+    })
+
+    pubsub.emit(channel, null)
+  })
+})
+
+test('emit with undefined payload sends no payload', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.is(payload, '')
+      resolve()
+    })
+
+    pubsub.emit(channel)
+  })
+})
+
 test('emit when not connected', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub(opts)
