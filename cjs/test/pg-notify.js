@@ -913,6 +913,65 @@ test('maxPayloadSize accepts 0 as a valid value', (t) => {
   t.is(pubsub.maxPayloadSize, 0)
 })
 
+test('delivers __proto__ payload as raw string', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const raw = '{"__proto__":{"polluted":true}}'
+  let received = null
+
+  await pubsub.on(channel, (payload) => {
+    received = payload
+  })
+
+  pubsub.client.emit('notification', { channel, payload: raw })
+  t.is(received, raw)
+})
+
+test('delivers constructor.prototype payload as raw string', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const raw = '{"constructor":{"prototype":{"polluted":true}}}'
+  let received = null
+
+  await pubsub.on(channel, (payload) => {
+    received = payload
+  })
+
+  pubsub.client.emit('notification', { channel, payload: raw })
+  t.is(received, raw)
+})
+
+test('delivers non-JSON string payload normally', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.is(payload, 'just a plain string')
+      resolve()
+    })
+
+    pubsub.emit(channel, 'just a plain string')
+  })
+})
+
 test('calling close removes listeners', async (t) => {
   const channel = getChannel()
   const pubsub = new PGPubSub(opts)

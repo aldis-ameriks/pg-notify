@@ -164,7 +164,11 @@ class PGPubSub {
 
       try {
         message.payload = sjson.parse(message.payload)
-      } catch {}
+      } catch (err) {
+        if (err.message && err.message.includes('forbidden prototype property')) {
+          this._debug('[_setupClient] prototype pollution detected in payload', message)
+        }
+      }
 
       this.ee.emit(message.channel, message.payload)
     })
