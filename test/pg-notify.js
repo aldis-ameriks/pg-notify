@@ -643,15 +643,39 @@ test('reduces listener count when multiple listeners', async (t) => {
     emitCount++
   }
 
-  pubsub.on(channel, listener)
-  pubsub.on(channel, listener)
+  await pubsub.on(channel, listener)
+  await pubsub.on(channel, listener)
   t.deepEqual(pubsub.channels, { [channel]: { listeners: 2 } })
-  pubsub.emit(channel, 'this-is-the-payload')
+  await pubsub.emit(channel, 'this-is-the-payload')
 
   await waitUntilTrue(() => emitCount === 2)
   await pubsub.removeListener(channel, listener)
 
   t.deepEqual(pubsub.channels, { [channel]: { listeners: 1 } })
+})
+
+test('does not update channels when LISTEN query fails', async (t) => {
+  const channel = getChannel()
+  const pubsub = new PGPubSub(opts)
+  await pubsub.connect()
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+
+  const originalQuery = pubsub.client.query.bind(pubsub.client)
+  pubsub.client.query = (sql, ...args) => {
+    if (sql.startsWith('LISTEN')) {
+      return Promise.reject(new Error('LISTEN failed'))
+    }
+    return originalQuery(sql, ...args)
+  }
+
+  const listener = () => {}
+
+  await t.throwsAsync(() => pubsub.on(channel, listener), { message: 'LISTEN failed' })
+  t.deepEqual(pubsub.channels, {})
+  t.is(pubsub.ee.listenerCount(channel), 0)
 })
 
 test('removing unknown listener', async (t) => {

@@ -67,10 +67,10 @@ class PGPubSub {
       return
     }
 
+    await this.client.query(`LISTEN ${format.ident(channel)}`)
+
     this.ee.on(channel, listener)
     this.channels[channel] = { listeners: 1 }
-
-    return this.client.query(`LISTEN ${format.ident(channel)}`)
   }
 
   async removeListener (channel, listener) {
