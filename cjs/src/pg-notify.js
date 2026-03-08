@@ -21,6 +21,10 @@ class PGPubSub {
 
     this.reconnectMaxRetries = typeof opts.reconnectMaxRetries !== 'undefined' ? opts.reconnectMaxRetries : 10
     this.maxPayloadSize = opts.maxPayloadSize || 7999 // default on a standard pg installation
+    if (opts.onConnectionError && typeof opts.onConnectionError !== 'function') {
+      throw new TypeError('onConnectionError must be a function')
+    }
+    this.onConnectionError = opts.onConnectionError || null
 
     this.state = states.init
     this.reconnectRetries = 0
@@ -127,7 +131,7 @@ class PGPubSub {
     } catch (err) {
       if (this.reconnectRetries >= this.reconnectMaxRetries) {
         await this.close()
-        throw new Error('[PGPubSub]: max reconnect attempts reached, aborting', err)
+        throw new Error('[PGPubSub]: max reconnect attempts reached, aborting', { cause: err })
       }
       if (![states.closing, states.connected].includes((this.state))) {
         await sleep(10)
@@ -155,10 +159,21 @@ class PGPubSub {
 
       if (this.reconnectRetries > this.reconnectMaxRetries) {
         this.close()
-        throw new Error('[PGPubSub]: max reconnect attempts reached, aborting', err)
+        const error = new Error('[PGPubSub]: max reconnect attempts reached, aborting', { cause: err })
+        if (this.onConnectionError) {
+          try { this.onConnectionError(error) } catch (e) { this._debug('[onConnectionError] callback error', e) }
+          return
+        }
+        throw error
       }
 
-      this._reconnect()
+      this._reconnect().catch(reconnectError => {
+        if (this.onConnectionError) {
+          try { this.onConnectionError(reconnectError) } catch (e) { this._debug('[onConnectionError] callback error', e) }
+          return
+        }
+        process.nextTick(() => { throw reconnectError })
+      })
     })
 
     this._debug('[_setupClient] init listeners')

@@ -3,6 +3,7 @@ import { ClientConfig } from 'pg'
 export interface Options extends ClientConfig {
   reconnectMaxRetries?: number;
   maxPayloadSize?: number;
+  onConnectionError?: (error: Error) => void;
 }
 
 declare class PGPubSub {

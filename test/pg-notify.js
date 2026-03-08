@@ -16,11 +16,15 @@ const opts = {
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
 }
 
-async function waitUntilTrue (cb) {
+async function waitUntilTrue (cb, timeout = 5000) {
+  const start = Date.now()
   while (true) {
     const result = cb()
     if (result) {
       break
+    }
+    if (Date.now() - start > timeout) {
+      throw new Error('waitUntilTrue timed out')
     }
     await sleep(1)
   }
@@ -122,6 +126,13 @@ test('works with concurrent emits', async (t) => {
   await waitUntilTrue(() => emitCount === expected)
 })
 
+test('throws TypeError when onConnectionError is not a function', (t) => {
+  t.throws(() => new PGPubSub({ ...opts, onConnectionError: 'not-a-function' }), {
+    instanceOf: TypeError,
+    message: 'onConnectionError must be a function'
+  })
+})
+
 test('retries and throws when initial connection fails', async (t) => {
   const pubsub = new PGPubSub({
     ...opts,
@@ -136,6 +147,28 @@ test('retries and throws when initial connection fails', async (t) => {
   }
 
   t.is(pubsub.reconnectRetries, 10)
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+})
+
+test('onConnectionError is not called during initial connect failure', async (t) => {
+  const errors = []
+  const pubsub = new PGPubSub({
+    ...opts,
+    reconnectMaxRetries: 2,
+    host: 'xxx',
+    onConnectionError: (err) => {
+      errors.push(err)
+    }
+  })
+
+  const err = await t.throwsAsync(() => pubsub.connect())
+  t.is(err.message, '[PGPubSub]: max reconnect attempts reached, aborting')
+
+  t.is(errors.length, 0)
+  t.is(pubsub.state, 'closing')
 
   t.teardown(() => {
     pubsub.close()
@@ -237,6 +270,78 @@ test('connection cannot be re-established', async (t) => {
     if (pubsub.close) {
       pubsub.close()
     }
+  })
+})
+
+test('onConnectionError callback receives error when retries exhausted', async (t) => {
+  const channel = getChannel()
+  const errors = []
+  const pubsub = new PGPubSub({
+    ...opts,
+    reconnectMaxRetries: 1,
+    onConnectionError: (err) => {
+      errors.push(err)
+    }
+  })
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.deepEqual(payload, 'this-is-the-payload')
+      resolve()
+    })
+    pubsub.emit(channel, 'this-is-the-payload')
+  })
+
+  // emulate pg client emitting an error after retries exceeded
+  pubsub.reconnectRetries = 2
+  pubsub.client.emit('error', new Error('connection reset'))
+
+  await sleep(10)
+
+  await waitUntilTrue(() => pubsub.state === 'closing')
+  t.is(errors.length, 1)
+  t.is(errors[0].message, '[PGPubSub]: max reconnect attempts reached, aborting')
+
+  t.teardown(() => {
+    pubsub.close()
+  })
+})
+
+test('onConnectionError callback receives error when reconnect exhausts retries', async (t) => {
+  const channel = getChannel()
+  const errors = []
+  const pubsub = new PGPubSub({
+    ...opts,
+    reconnectMaxRetries: 1,
+    onConnectionError: (err) => {
+      errors.push(err)
+    }
+  })
+
+  await pubsub.connect()
+  t.is(pubsub.state, 'connected')
+
+  await new Promise(resolve => {
+    pubsub.on(channel, (payload) => {
+      t.deepEqual(payload, 'this-is-the-payload')
+      resolve()
+    })
+    pubsub.emit(channel, 'this-is-the-payload')
+  })
+
+  // point host to invalid address so _reconnect() will fail and exhaust retries
+  pubsub.opts.host = 'xxx'
+  pubsub.client.emit('error', new Error('connection reset'))
+
+  await waitUntilTrue(() => errors.length === 1)
+  t.is(errors[0].message, '[PGPubSub]: max reconnect attempts reached, aborting')
+  t.is(pubsub.state, 'closing')
+
+  t.teardown(() => {
+    pubsub.close()
   })
 })
 
