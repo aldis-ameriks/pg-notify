@@ -4,3 +4,5 @@ node_modules
 .nyc_output
 coverage
 package-lock.json
+docs/TODO.md
+CLAUDE.local.md
